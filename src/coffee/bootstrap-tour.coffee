@@ -98,6 +98,7 @@
         animation: true
         container: @_options.container
         backdrop: @_options.backdrop
+        interactable:  @_options.interactable || true
         redirect: @_options.redirect
         orphan: @_options.orphan
         template: @_options.template
@@ -239,7 +240,7 @@
 
           @_debug "Show the orphan step #{@_current + 1}. Orphans option is true."
 
-        @_showBackdrop(step.element unless @_isOrphan(step)) if step.backdrop
+        @_showBackdrop(step.element unless @_isOrphan(step), step) if step.backdrop
 
         # Show popover
         @_showPopover(step, i)
@@ -424,11 +425,11 @@
       else
         cb.call(@, arg)
 
-    _showBackdrop: (element) ->
+    _showBackdrop: (element, step) ->
       return unless @backdrop.overlay == null
 
       @_showOverlay()
-      @_showOverlayElement(element) if element?
+      @_showOverlayElement(element, step) if element?
 
     _hideBackdrop: ->
       return if @backdrop.overlay == null
@@ -446,7 +447,7 @@
       @backdrop.remove()
       @backdrop.overlay = null
 
-    _showOverlayElement: (element) ->
+    _showOverlayElement: (element, step) ->
       $element = $(element)
       $background = $("<div/>")
 
@@ -463,11 +464,29 @@
       $element.addClass("tour-step-backdrop")
 
       $("body").append($background)
+      
+      maskSelector = "iframe[class='tour-backdrop-mask']"
+      
+      if step.interactable
+        $element.find(maskSelector).remove()
+      else
+      	if $(maskSelector, $element).length == 0
+          eventSuppressor = $("<iframe frameborder='0' />")
+          eventSuppressor.addClass("tour-backdrop-mask")
+          $element.prepend(eventSuppressor) 
+      
       @backdrop.$element = $element
       @backdrop.$background = $background
 
+    _removeElementMask: ->
+      if @backdrop.$element
+        $("iframe[class='tour-backdrop-mask']", @backdrop.$element).remove()
+    
     _hideOverlayElement: ->
       @backdrop.$element.removeClass("tour-step-backdrop")
+      
+      @_removeElementMask()
+      
       @backdrop.$background.remove()
       @backdrop.$element = null
       @backdrop.$background = null
