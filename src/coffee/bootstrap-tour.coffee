@@ -240,7 +240,7 @@
 
           @_debug "Show the orphan step #{@_current + 1}. Orphans option is true."
 
-        @_showBackdrop(step.element unless @_isOrphan(step), step) if step.backdrop
+        @_showBackdrop(step) if step.backdrop
 
         # Show popover
         @_showPopover(step, i)
@@ -425,11 +425,11 @@
       else
         cb.call(@, arg)
 
-    _showBackdrop: (element, step) ->
+    _showBackdrop: (step) ->
       return unless @backdrop.overlay == null
 
       @_showOverlay()
-      @_showOverlayElement(element, step) if element?
+      @_showOverlayElement(step)
 
     _hideBackdrop: ->
       return if @backdrop.overlay == null
@@ -447,7 +447,11 @@
       @backdrop.remove()
       @backdrop.overlay = null
 
-    _showOverlayElement: (element, step) ->
+    _showOverlayElement: (step) ->
+      element = step.element unless @_isOrphan(step)
+
+      return unless element
+      
       $element = $(element)
       $background = $("<div/>")
 
