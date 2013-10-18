@@ -345,7 +345,7 @@
       $tip.attr("id", step.id)
       @_scrollIntoView($tip)
       @_reposition($tip, step)
-
+      
       if isOrphan
         @_center($tip)
 
@@ -372,6 +372,9 @@
         @_replaceArrow($tip, (tipOffset.left - originalLeft) * 2, offsetWidth, "left") if originalLeft != tipOffset.left
       else
         @_replaceArrow($tip, (tipOffset.top - originalTop) * 2, offsetHeight, "top") if originalTop != tipOffset.top
+        
+      element = @_getStepElement(step)
+      if element? then @_positionOverlay($(element))
 
     # Center popover in the page
     _center: ($tip) ->
@@ -441,20 +444,36 @@
       @backdrop = $("<div/>",
         class: "tour-backdrop"
       )
-      $("body").append(@backdrop)
+      body = $("body")
+      if $(".tour-backdrop", body).length is 0 then return body.append(@backdrop) else return body
 
     _hideOverlay: ->
       @backdrop.remove()
       @backdrop.overlay = null
 
+    _positionOverlay: ($element) ->
+      return unless $element? and @backdrop.$background?
+      offset = $element.offset()
+      offset.top = offset.top
+      offset.left = offset.left
+
+      @backdrop.$background
+        .width($element.innerWidth())
+        .height($element.innerHeight())
+        .addClass("tour-step-background")
+        .offset(offset)
+    
+    _getStepElement: (step) ->
+      return step.element unless @_isOrphan(step)
+     
     _showOverlayElement: (step) ->
-      element = step.element unless @_isOrphan(step)
+      element = @_getStepElement(step);
 
       return unless element
       
       $element = $(element)
       $background = $("<div/>")
-
+      ###
       offset = $element.offset()
       offset.top = offset.top
       offset.left = offset.left
@@ -464,7 +483,8 @@
         .height($element.innerHeight())
         .addClass("tour-step-background")
         .offset(offset)
-
+      ###
+      
       $element.addClass("tour-step-backdrop")
 
       $("body").append($background)
@@ -481,6 +501,7 @@
       
       @backdrop.$element = $element
       @backdrop.$background = $background
+      @_positionOverlay($element)
 
     _removeElementMask: ->
       if @backdrop.$element
