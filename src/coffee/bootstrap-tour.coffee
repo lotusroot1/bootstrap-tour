@@ -108,6 +108,7 @@
         onHidden: @_options.onHidden
         onNext: @_options.onNext
         onPrev: @_options.onPrev
+        tour: @
       }, @_steps[i]) if @_steps[i]?
 
     # Start tour from current step
@@ -473,17 +474,6 @@
       
       $element = $(element)
       $background = $("<div/>")
-      ###
-      offset = $element.offset()
-      offset.top = offset.top
-      offset.left = offset.left
-
-      $background
-        .width($element.innerWidth())
-        .height($element.innerHeight())
-        .addClass("tour-step-background")
-        .offset(offset)
-      ###
       
       $element.addClass("tour-step-backdrop")
 
